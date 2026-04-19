@@ -1,15 +1,12 @@
 import { useEffect } from 'react';
-import type { MutableRefObject } from 'react';
+import type { RefObject } from 'react';
 import { gridToAscii } from './gridAscii';
+import type { DotUpdate, Grid } from './grid';
 
-export interface DotUpdate {
-  row: number;
-  col: number;
-  on: boolean;
-}
+export type { DotUpdate } from './grid';
 
 interface Params {
-  gridRef: MutableRefObject<boolean[][]>;
+  gridRef: RefObject<Grid>;
   setDot: (row: number, col: number, on: boolean) => void;
   setDots: (dots: DotUpdate[]) => void;
 }

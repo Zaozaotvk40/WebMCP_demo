@@ -1,46 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useWebMCPTools, type DotUpdate } from './useWebMCPTools';
+import { useState } from 'react';
+import { DotGrid } from './DotGrid';
+import { useGrid } from './useGrid';
+import { useWebMCPTools } from './useWebMCPTools';
 import './App.css';
 
-const SIZE = 16;
-
-function makeEmptyGrid(): boolean[][] {
-  return Array.from({ length: SIZE }, () => Array<boolean>(SIZE).fill(false));
-}
-
 function App() {
-  const [grid, setGrid] = useState<boolean[][]>(makeEmptyGrid);
-  const gridRef = useRef(grid);
-  useEffect(() => {
-    gridRef.current = grid;
-  }, [grid]);
+  const { grid, gridRef, setDot, setDots, clear } = useGrid();
 
   const [mcpAvailable] = useState<boolean>(
     () => typeof navigator !== 'undefined' && !!navigator.modelContext,
   );
-
-  const setDot = useCallback((row: number, col: number, on: boolean) => {
-    setGrid((prev) => {
-      if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) return prev;
-      if (prev[row][col] === on) return prev;
-      const next = prev.map((r) => r.slice());
-      next[row][col] = on;
-      return next;
-    });
-  }, []);
-
-  const setDots = useCallback((dots: DotUpdate[]) => {
-    setGrid((prev) => {
-      const next = prev.map((r) => r.slice());
-      for (const d of dots) {
-        if (d.row < 0 || d.row >= SIZE || d.col < 0 || d.col >= SIZE) continue;
-        next[d.row][d.col] = d.on;
-      }
-      return next;
-    });
-  }, []);
-
-  const clearGrid = useCallback(() => setGrid(makeEmptyGrid()), []);
 
   useWebMCPTools({ gridRef, setDot, setDots });
 
@@ -58,27 +27,13 @@ function App() {
         </p>
       </header>
 
-      <div
-        className="grid"
-        style={{ gridTemplateColumns: `repeat(${SIZE}, 32px)` }}
-        role="grid"
-        aria-label="16 by 16 dot grid"
-      >
-        {grid.map((row, r) =>
-          row.map((cell, c) => (
-            <button
-              key={`${r}-${c}`}
-              className={`cell ${cell ? 'on' : 'off'}`}
-              role="gridcell"
-              aria-label={`row ${r} col ${c} ${cell ? 'on' : 'off'}`}
-              onClick={() => setDot(r, c, !cell)}
-            />
-          )),
-        )}
-      </div>
+      <DotGrid
+        grid={grid}
+        onToggle={(r, c, current) => setDot(r, c, !current)}
+      />
 
       <div className="controls">
-        <button type="button" onClick={clearGrid}>
+        <button type="button" onClick={clear}>
           Clear
         </button>
         <span className="hint">
