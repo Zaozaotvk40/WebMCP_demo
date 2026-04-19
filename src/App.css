@@ -90,3 +90,32 @@
   font-size: 13px;
   color: var(--text);
 }
+
+.notes {
+  margin-top: 32px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(234, 179, 8, 0.06);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.notes h2 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+.notes ol {
+  margin: 0;
+  padding-left: 20px;
+}
+.notes ul {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+.notes code {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 1px 5px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 3px;
+}

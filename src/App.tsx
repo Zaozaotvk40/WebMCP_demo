@@ -40,6 +40,36 @@ function App() {
           Tools: <code>set_dot</code>, <code>set_dots</code>, <code>get_grid</code>
         </span>
       </div>
+
+      <footer className="notes">
+        <h2>動作確認の前提</h2>
+        <ol>
+          <li>
+            <strong>Chrome 149 以上</strong>が必要。起動時に
+            <code>--remote-debugging-port=9222</code> オプションを付ける。
+          </li>
+          <li>
+            以下の 2 つのフラグを <strong>Enabled</strong> にする:
+            <ul>
+              <li><code>chrome://flags/#devtools-webmcp-support</code></li>
+              <li><code>chrome://flags/#enable-webmcp-testing</code></li>
+            </ul>
+          </li>
+          <li>
+            <code>chrome-devtools-mcp</code> 側は現在のリリースではまだ動作しない。
+            <strong>0.22.0 以降</strong>での対応を見込み。
+          </li>
+          <li>
+            現状、手軽に動作確認するには Chrome 拡張{' '}
+            <strong>WebMCP - Model Context Tool Inspector</strong> を
+            インストールし、以下のいずれかで実行:
+            <ul>
+              <li>ツールと入力を手動で設定して呼び出す</li>
+              <li>Gemini の API キーを使って動作確認</li>
+            </ul>
+          </li>
+        </ol>
+      </footer>
     </div>
   );
 }
