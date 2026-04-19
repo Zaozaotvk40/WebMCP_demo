@@ -67,6 +67,9 @@ function App() {
               <li>ツールと入力を手動で設定して呼び出す</li>
               <li>Gemini の API キーを使って動作確認</li>
             </ul>
+            なお Inspector 拡張については{' '}
+            <code>chrome://flags/#enable-webmcp-testing</code> を有効にした
+            <strong>Chrome 146</strong> でも動作する。
           </li>
         </ol>
       </footer>
