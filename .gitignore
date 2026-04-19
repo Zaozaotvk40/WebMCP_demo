@@ -23,6 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# AI context memo (local only, not shared with the team)
+# AI context memos (local only, not shared with the team)
 CLAUDE.md
+ARCHITECTURE.md
 
