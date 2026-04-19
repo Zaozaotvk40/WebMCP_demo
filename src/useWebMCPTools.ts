@@ -21,78 +21,101 @@ export function useWebMCPTools({ gridRef, setDot, setDots }: Params) {
       return;
     }
 
-    mc.registerTool({
-      name: 'set_dot',
-      description:
-        'Set a single dot on/off in the 16x16 grid. Use this for small corrections after calling get_grid.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          row: { type: 'integer', minimum: 0, maximum: 15, description: 'Row index 0-15 (top to bottom)' },
-          col: { type: 'integer', minimum: 0, maximum: 15, description: 'Column index 0-15 (left to right)' },
-          on: { type: 'boolean', description: 'true to turn the dot on, false to turn it off' },
-        },
-        required: ['row', 'col', 'on'],
-      },
-      execute: (input) => {
-        const { row, col, on } = input as { row: number; col: number; on: boolean };
-        setDot(row, col, on);
-        return {
-          content: [{ type: 'text', text: `dot (${row},${col}) = ${on}` }],
-        };
-      },
-    });
+    // Tools are unregistered by aborting this controller (Chrome 149+ API).
+    // In Chrome 146 the AbortSignal option is silently ignored; falls back
+    // to calling the legacy unregisterTool at cleanup if present.
+    const controller = new AbortController();
+    const { signal } = controller;
 
-    mc.registerTool({
-      name: 'set_dots',
-      description:
-        'Batch-update many dots in one call. Prefer this over repeated set_dot when drawing a shape (smiley, letter, pattern).',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          dots: {
-            type: 'array',
-            description: 'List of dot updates. Each item: {row:0-15, col:0-15, on:boolean}.',
-            items: {
-              type: 'object',
-              properties: {
-                row: { type: 'integer', minimum: 0, maximum: 15 },
-                col: { type: 'integer', minimum: 0, maximum: 15 },
-                on: { type: 'boolean' },
+    mc.registerTool(
+      {
+        name: 'set_dot',
+        description:
+          'Set a single dot on/off in the 16x16 grid. Use this for small corrections after calling get_grid.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            row: { type: 'integer', minimum: 0, maximum: 15, description: 'Row index 0-15 (top to bottom)' },
+            col: { type: 'integer', minimum: 0, maximum: 15, description: 'Column index 0-15 (left to right)' },
+            on: { type: 'boolean', description: 'true to turn the dot on, false to turn it off' },
+          },
+          required: ['row', 'col', 'on'],
+        },
+        execute: (input) => {
+          const { row, col, on } = input as { row: number; col: number; on: boolean };
+          setDot(row, col, on);
+          return {
+            content: [{ type: 'text', text: `dot (${row},${col}) = ${on}` }],
+          };
+        },
+      },
+      { signal },
+    );
+
+    mc.registerTool(
+      {
+        name: 'set_dots',
+        description:
+          'Batch-update many dots in one call. Prefer this over repeated set_dot when drawing a shape (smiley, letter, pattern).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            dots: {
+              type: 'array',
+              description: 'List of dot updates. Each item: {row:0-15, col:0-15, on:boolean}.',
+              items: {
+                type: 'object',
+                properties: {
+                  row: { type: 'integer', minimum: 0, maximum: 15 },
+                  col: { type: 'integer', minimum: 0, maximum: 15 },
+                  on: { type: 'boolean' },
+                },
+                required: ['row', 'col', 'on'],
               },
-              required: ['row', 'col', 'on'],
             },
           },
+          required: ['dots'],
         },
-        required: ['dots'],
+        execute: (input) => {
+          const { dots } = input as { dots: DotUpdate[] };
+          setDots(dots);
+          return {
+            content: [{ type: 'text', text: `updated ${dots.length} dots` }],
+          };
+        },
       },
-      execute: (input) => {
-        const { dots } = input as { dots: DotUpdate[] };
-        setDots(dots);
-        return {
-          content: [{ type: 'text', text: `updated ${dots.length} dots` }],
-        };
-      },
-    });
+      { signal },
+    );
 
-    mc.registerTool({
-      name: 'get_grid',
-      description:
-        'Render the current 16x16 grid as an ASCII map with row/column number headers. "#" means on, "." means off. Use this to verify what you just drew and locate errors by coordinate.',
-      inputSchema: { type: 'object', properties: {} },
-      execute: () => {
-        const g = gridRef.current;
-        return {
-          content: [{ type: 'text', text: gridToAscii(g) }],
-          structuredContent: { grid: g, rows: g.length, cols: g[0]?.length ?? 0 },
-        };
+    mc.registerTool(
+      {
+        name: 'get_grid',
+        description:
+          'Render the current 16x16 grid as an ASCII map with row/column number headers. "#" means on, "." means off. Use this to verify what you just drew and locate errors by coordinate.',
+        inputSchema: { type: 'object', properties: {} },
+        execute: () => {
+          const g = gridRef.current;
+          return {
+            content: [{ type: 'text', text: gridToAscii(g) }],
+            structuredContent: { grid: g, rows: g.length, cols: g[0]?.length ?? 0 },
+          };
+        },
       },
-    });
+      { signal },
+    );
 
     return () => {
-      mc.unregisterTool('set_dot');
-      mc.unregisterTool('set_dots');
-      mc.unregisterTool('get_grid');
+      controller.abort();
+      // Legacy fallback for implementations that ignore the signal option.
+      if (typeof mc.unregisterTool === 'function') {
+        try {
+          mc.unregisterTool('set_dot');
+          mc.unregisterTool('set_dots');
+          mc.unregisterTool('get_grid');
+        } catch {
+          // Ignore — already unregistered via abort.
+        }
+      }
     };
   }, [gridRef, setDot, setDots]);
 }

@@ -22,10 +22,19 @@ export interface WebMCPTool {
   ) => WebMCPToolResponse | Promise<WebMCPToolResponse>;
 }
 
+export interface RegisterToolOptions {
+  signal?: AbortSignal;
+}
+
 export interface ModelContext {
-  registerTool(tool: WebMCPTool): void;
-  unregisterTool(name: string): void;
+  registerTool(tool: WebMCPTool, options?: RegisterToolOptions): void;
   provideContext(ctx: { tools: WebMCPTool[] }): void;
+  /**
+   * @deprecated Removed in Chrome 149+. Use the AbortSignal option of
+   * `registerTool` instead: `registerTool(tool, { signal: controller.signal })`
+   * then call `controller.abort()` to unregister.
+   */
+  unregisterTool?(name: string): void;
 }
 
 declare global {

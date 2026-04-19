@@ -3,26 +3,39 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeEmptyGrid } from './grid';
 import type { Grid } from './grid';
 import { useWebMCPTools } from './useWebMCPTools';
-import type { WebMCPTool } from './webmcp';
+import type { RegisterToolOptions, WebMCPTool } from './webmcp';
 
 interface ToolStore {
   registered: Map<string, WebMCPTool>;
+  registerCalls: number;
 }
 
+/**
+ * Fake implementation mimicking Chrome 149+ behavior:
+ * - registerTool throws on duplicate names
+ * - AbortSignal in options removes the tool when aborted
+ * - unregisterTool method is absent (removed in 149)
+ */
 function installFakeModelContext(): ToolStore {
-  const store: ToolStore = { registered: new Map() };
+  const store: ToolStore = { registered: new Map(), registerCalls: 0 };
   Object.defineProperty(navigator, 'modelContext', {
     configurable: true,
     value: {
-      registerTool: (t: WebMCPTool) => {
+      registerTool: (t: WebMCPTool, options?: RegisterToolOptions) => {
+        store.registerCalls++;
+        if (store.registered.has(t.name)) {
+          throw new Error(`Duplicate tool name: ${t.name}`);
+        }
         store.registered.set(t.name, t);
-      },
-      unregisterTool: (name: string) => {
-        store.registered.delete(name);
+        options?.signal?.addEventListener('abort', () => {
+          store.registered.delete(t.name);
+        });
       },
       provideContext: ({ tools }: { tools: WebMCPTool[] }) => {
+        store.registered.clear();
         for (const t of tools) store.registered.set(t.name, t);
       },
+      // Note: no unregisterTool method (matches Chrome 149).
     },
   });
   return store;
@@ -64,10 +77,18 @@ describe('useWebMCPTools', () => {
     expect(store.registered.has('get_grid')).toBe(true);
   });
 
-  it('unregisters all tools on unmount', () => {
+  it('unregisters all tools on unmount via AbortSignal', () => {
     const { hook } = setupHook();
+    expect(store.registered.size).toBe(3);
     hook.unmount();
     expect(store.registered.size).toBe(0);
+  });
+
+  it('can re-mount without throwing Duplicate tool name', () => {
+    const { hook } = setupHook();
+    hook.unmount();
+    expect(() => setupHook()).not.toThrow();
+    expect(store.registered.size).toBe(3);
   });
 
   it('set_dot handler delegates to setDot and returns a confirmation message', async () => {
@@ -97,8 +118,8 @@ describe('useWebMCPTools', () => {
     const tool = store.registered.get('get_grid')!;
     const result = await tool.execute({});
     const text = result.content?.[0].text ?? '';
-    expect(text).toContain('0000000000111111'); // tens header
-    expect(text).toContain('0123456789012345'); // ones header
+    expect(text).toContain('0000000000111111');
+    expect(text).toContain('0123456789012345');
     expect(text.split('\n')[2]).toBe(' 0 #...............');
     expect(result.structuredContent).toEqual({
       grid: gridRef.current,
