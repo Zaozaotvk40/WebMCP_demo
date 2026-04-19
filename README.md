@@ -1,73 +1,79 @@
-# React + TypeScript + Vite
+# WebMCP 16×16 Dot Grid Demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[**Live Demo**](https://zaozaotvk40.github.io/WebMCP_demo/)
 
-Currently, two official plugins are available:
+16×16 のドットグリッドを React で描画し、AI エージェントが [WebMCP](https://webmachinelearning.github.io/webmcp/) (`navigator.modelContext`) 経由でドットを操作・確認できるデモです。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## デモの目的
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+単なる API 動作確認ではなく、**「AI が自分の出力を視覚的に検証して修正する」フィードバックループ**を可視化することが目的です。
 
-## Expanding the ESLint configuration
+1. AI が `set_dots` で絵（例: 笑顔）を一括描画
+2. AI が `get_grid` で結果を ASCII art として確認
+3. AI が誤りを空間的に認識し、`set_dot` で修正
+4. 再度 `get_grid` で確認
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+人間は画面上のセルをクリックして手動トグルでき、AI 操作とリアルタイムに混在します。
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 公開ツール (MCP Tools)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| ツール | 説明 |
+|--------|------|
+| `set_dot` | 1 つのセル `(row, col)` を on/off |
+| `set_dots` | 複数セルを一括更新（主要な描画手段） |
+| `get_grid` | グリッドを ASCII art + 生配列の二重表現で返す |
+
+---
+
+## 動作確認方法
+
+### 方法 A: chrome-devtools-mcp を使う（Chrome 149+）
+
+1. **Chrome 149 以上**で起動。起動オプションに `--remote-debugging-port=9222` を追加。
+2. 以下のフラグを **Enabled** にする:
+   - `chrome://flags/#devtools-webmcp-support`
+   - `chrome://flags/#enable-webmcp-testing`
+3. MCP クライアントの設定は [.mcp.json](.mcp.json) を参照。
+
+> `chrome-devtools-mcp` は現在のリリースではまだ動作しません。**0.22.0 以降**での対応を見込んでいます。
+
+### 方法 B: WebMCP - Model Context Tool Inspector 拡張を使う
+
+Chrome 拡張 **WebMCP - Model Context Tool Inspector** をインストールし、以下のいずれかで実行:
+
+- ツールと入力を手動で設定して呼び出す
+- Gemini の API キーを使って動作確認
+
+> Inspector 拡張は `chrome://flags/#enable-webmcp-testing` を有効にした **Chrome 146** でも動作します。
+
+---
+
+## ローカル開発
+
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm test         # ユニットテスト (vitest)
+npm run build    # 本番ビルド
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 技術スタック
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Vite 8 + React 19 + TypeScript
+- `navigator.modelContext` を直接使用（追加依存ゼロ）
+- Vitest + @testing-library/react
+
+---
+
+## 参考
+
+- [W3C WebMCP Community Group](https://webmachinelearning.github.io/webmcp/)
+- [Chrome 早期プレビュー告知](https://developer.chrome.com/blog/webmcp-epp)
+- [Scalekit 解説記事](https://www.scalekit.com/blog/webmcp-the-missing-bridge-between-ai-agents-and-the-web)
+- [Qiita 日本語解説](https://qiita.com/ho-rai/items/443a037674ec028b1524)
