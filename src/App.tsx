@@ -45,19 +45,19 @@ function App() {
         <h2>動作確認の前提</h2>
         <ol>
           <li>
-            <strong>Chrome 149 以上</strong>が必要。起動時に
-            <code>--remote-debugging-port=9222</code> オプションを付ける。
+            <s><strong>Chrome 149 以上</strong>が必要。起動時に
+            <code>--remote-debugging-port=9222</code> オプションを付ける。</s>
           </li>
           <li>
-            以下の 2 つのフラグを <strong>Enabled</strong> にする:
+            <s>以下の 2 つのフラグを <strong>Enabled</strong> にする:</s>
             <ul>
-              <li><code>chrome://flags/#devtools-webmcp-support</code></li>
-              <li><code>chrome://flags/#enable-webmcp-testing</code></li>
+              <li><s><code>chrome://flags/#devtools-webmcp-support</code></s></li>
+              <li><s><code>chrome://flags/#enable-webmcp-testing</code></s></li>
             </ul>
           </li>
           <li>
-            <code>chrome-devtools-mcp</code> 側は現在のリリースではまだ動作しない。
-            <strong>0.22.0 以降</strong>での対応を見込み。
+            <s><code>chrome-devtools-mcp</code> 側は現在のリリースではまだ動作しない。
+            <strong>0.22.0 以降</strong>での対応を見込み。</s>
           </li>
           <li>
             現状、手軽に動作確認するには Chrome 拡張{' '}

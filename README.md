@@ -31,15 +31,15 @@
 
 ## 動作確認方法
 
-### 方法 A: chrome-devtools-mcp を使う（Chrome 149+）
+### ~~方法 A: chrome-devtools-mcp を使う（Chrome 149+）~~
 
-1. **Chrome 149 以上**で起動。起動オプションに `--remote-debugging-port=9222` を追加。
-2. 以下のフラグを **Enabled** にする:
-   - `chrome://flags/#devtools-webmcp-support`
-   - `chrome://flags/#enable-webmcp-testing`
-3. MCP クライアントの設定は [.mcp.json](.mcp.json) を参照。
+~~1. **Chrome 149 以上**で起動。起動オプションに `--remote-debugging-port=9222` を追加。~~
+~~2. 以下のフラグを **Enabled** にする:~~
+   - ~~`chrome://flags/#devtools-webmcp-support`~~
+   - ~~`chrome://flags/#enable-webmcp-testing`~~
+~~3. MCP クライアントの設定は [.mcp.json](.mcp.json) を参照。~~
 
-> `chrome-devtools-mcp` は現在のリリースではまだ動作しません。**0.22.0 以降**での対応を見込んでいます。
+> ~~`chrome-devtools-mcp` は現在のリリースではまだ動作しません。**0.22.0 以降**での対応を見込んでいます。~~
 
 ### 方法 B: WebMCP - Model Context Tool Inspector 拡張を使う
 
